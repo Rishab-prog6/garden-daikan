@@ -1,0 +1,23 @@
+{
+  "name": "daikan-garden",
+  "private": true,
+  "version": "0.1.0",
+  "description": "待看花园 — 把 B 站待看清单变成一片会开花、会枯萎的花园。build in bilibili · AI 创造公开赛参赛作品。",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
