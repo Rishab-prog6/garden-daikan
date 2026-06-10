@@ -84,6 +84,23 @@ export function fmtDay(t: number): string {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
+/** 今日浇水清单：最该救的草排前面（快枯 > 在枯 > 等最久），最多 n 株 */
+export function todayPicks(plants: Plant[], now: number, n = 3): Plant[] {
+  const order: Record<Status, number> = { crit: 0, wilt: 1, fresh: 2, bloom: 3 }
+  return plants
+    .filter((p) => !p.watchedAt)
+    .sort((a, b) => order[statusOf(a, now)] - order[statusOf(b, now)] || a.addedAt - b.addedAt)
+    .slice(0, n)
+}
+
+/** 当前有效 streak：最近一次浇水不是今天也不是昨天，火就灭了 */
+export function currentStreak(s: { count: number; lastDoneOn: string | null } | undefined, now: number): number {
+  if (!s?.lastDoneOn) return 0
+  const today = dateKey(now)
+  const yesterday = dateKey(now - DAY)
+  return s.lastDoneOn === today || s.lastDoneOn === yesterday ? s.count : 0
+}
+
 /** 经验 → 等级。曲线越往后越慢 */
 export function level(xp: number): number {
   return Math.floor(Math.sqrt(xp / 12)) + 1

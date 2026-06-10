@@ -14,6 +14,14 @@ export interface Plant {
   plannedFor?: number
 }
 
+/** 连续浇水打卡（玩法参考 Duolingo streak）。可选，向后兼容 */
+export interface StreakState {
+  /** 连续天数 */
+  count: number
+  /** 最近一次看完视频是哪天（dateKey 格式 YYYY-M-D） */
+  lastDoneOn: string | null
+}
+
 /** 枯萎提醒设置（#2）。可选，老数据没有也不影响 */
 export interface ReminderState {
   /** 用户是否开启了枯萎提醒 */
@@ -29,4 +37,6 @@ export interface GardenState {
   demoOffset: number
   /** 枯萎提醒设置；可选，保持向后兼容 */
   reminders?: ReminderState
+  /** 连续浇水打卡；可选，保持向后兼容 */
+  streak?: StreakState
 }

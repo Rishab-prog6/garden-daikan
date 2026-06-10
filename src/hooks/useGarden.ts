@@ -48,7 +48,7 @@ export function useGarden() {
   const stateRef = useRef(state)
   stateRef.current = state
 
-  /** 看完一株 → 开花 + 涨经验。返回提示文案给 toast 用 */
+  /** 看完一株 → 开花 + 涨经验 + 续 streak。返回提示文案给 toast 用 */
   const finish = useCallback((id: number): string | null => {
     const s = stateRef.current
     const now = nowOf(s)
@@ -56,6 +56,18 @@ export function useGarden() {
     if (!target || target.watchedAt) return null
     const revived = daysWaiting(target, now) >= CRIT_DAYS
     const gain = revived ? 25 : 10
+
+    // 今天第一次浇水才续火：昨天浇过 → +1，断档 → 重新从 1 烧
+    const todayKey = dateKey(now)
+    const prevStreak = s.streak ?? { count: 0, lastDoneOn: null }
+    const firstToday = prevStreak.lastDoneOn !== todayKey
+    const newStreak = firstToday
+      ? {
+          count: prevStreak.lastDoneOn === dateKey(now - DAY) ? prevStreak.count + 1 : 1,
+          lastDoneOn: todayKey,
+        }
+      : prevStreak
+
     setState((prev) => {
       const t = prev.plants.find((p) => p.id === id)
       if (!t || t.watchedAt) return prev // 已经开过花就不重复涨经验
@@ -63,9 +75,11 @@ export function useGarden() {
         ...prev,
         plants: prev.plants.map((p) => (p.id === id ? { ...p, watchedAt: now } : p)),
         xp: prev.xp + gain,
+        streak: newStreak,
       }
     })
-    return revived ? '起死回生！这株快枯了被你救回来 +25 XP' : '开花了 🌸  +10 XP'
+    const base = revived ? '起死回生！这株快枯了被你救回来 +25 XP' : '开花了 🌸  +10 XP'
+    return firstToday ? `${base} · 🔥 连续浇水 ${newStreak.count} 天` : base
   }, [])
 
   const remove = useCallback((id: number) => {
@@ -77,7 +91,13 @@ export function useGarden() {
   }, [])
 
   const reset = useCallback(
-    () => setState({ plants: [], xp: 0, demoOffset: 0, reminders: { enabled: false, lastNotifiedOn: null } }),
+    () => setState({
+      plants: [],
+      xp: 0,
+      demoOffset: 0,
+      reminders: { enabled: false, lastNotifiedOn: null },
+      streak: { count: 0, lastDoneOn: null },
+    }),
     [],
   )
 

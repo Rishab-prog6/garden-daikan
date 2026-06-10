@@ -1,11 +1,11 @@
 import { useMemo, useRef, useState } from 'react'
 import { useGarden } from './hooks/useGarden'
-import { nowOf, wiltingPlants, fmtDay } from './lib/garden'
+import { nowOf, wiltingPlants, fmtDay, todayPicks, currentStreak, dateKey } from './lib/garden'
 import { CalendarView } from './components/CalendarView'
 import { Header } from './components/Header'
 import { Stats } from './components/Stats'
 import { AddPlant } from './components/AddPlant'
-import { ReminderBanner } from './components/ReminderBanner'
+import { DailyCard } from './components/DailyCard'
 import { Wishlist } from './components/Wishlist'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
@@ -49,20 +49,19 @@ export default function App() {
     <div className="wrap">
       <Header xp={state.xp} />
       <Stats todo={counts.todo} bloomed={counts.bloomed} wilting={counts.wilting} />
-      <ReminderBanner
-        wilt={counts.wilt}
+      <DailyCard
+        picks={todayPicks(state.plants, now)}
+        todoCount={counts.todo}
         crit={counts.crit}
+        streak={currentStreak(state.streak, now)}
+        wateredToday={(state.streak?.lastDoneOn ?? null) === dateKey(now)}
+        now={now}
         remindersEnabled={state.reminders?.enabled ?? false}
         onToggleReminders={(on) => {
           setRemindersEnabled(on)
           if (on) showToast('开启提醒了 🔔 —— 标签页开着时，枯萎的草会来敲你')
         }}
-        onSeeWilting={() => {
-          // 直接打开最危险那株的详情
-          const { wilt, crit } = wiltingPlants(state.plants, now)
-          const target = crit[0] ?? wilt[0]
-          if (target) setDetailId(target.id)
-        }}
+        onOpen={setDetailId}
       />
       <AddPlant onAdd={addPlant} onOpenImport={() => setShowImport(true)} />
       {showImport && (

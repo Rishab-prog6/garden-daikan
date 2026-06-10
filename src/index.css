@@ -52,12 +52,19 @@ h1 .pin{color:var(--bloom);}
 .btn:hover{background:#456e2e;}
 .btn:active{transform:translateY(2px);box-shadow:0 0 0 #3c5e27;}
 
-.reminder{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:linear-gradient(var(--card),#FBF3DE);border:1px solid #E7C98A;border-radius:14px;padding:12px 16px;margin-bottom:16px;box-shadow:var(--shadow);}
-.reminder-text{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);line-height:1.4;}
-.reminder-emoji{font-size:20px;flex:none;}
-.reminder-actions{display:flex;gap:8px;flex:none;}
-.reminder-see,.reminder-bell{font-family:var(--cn);font-size:13px;cursor:pointer;border-radius:10px;padding:8px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);transition:all .15s;white-space:nowrap;}
-.reminder-see:hover,.reminder-bell:hover{border-color:var(--wilt);color:var(--wilt);}
+.daily{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(var(--card),#FBF3DE);border:1px solid #E7C98A;border-radius:14px;padding:12px 16px;margin-bottom:16px;box-shadow:var(--shadow);}
+.daily-streak{display:flex;align-items:center;gap:7px;flex:none;padding-right:14px;border-right:1.5px dashed var(--line);}
+.daily-streak .flame{font-size:24px;line-height:1;}
+.daily-streak b{font-family:var(--latin);font-weight:700;font-size:26px;line-height:1;color:var(--leaf-deep);}
+.daily-streak-label{font-size:11px;color:var(--ink-soft);max-width:96px;line-height:1.35;}
+.daily-list{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;min-width:220px;}
+.daily-title{font-size:12.5px;font-weight:700;color:var(--ink-soft);flex:none;}
+.daily-title em{font-style:normal;color:#a84e22;}
+.daily-pick{font-family:var(--cn);font-size:12.5px;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 12px;color:var(--ink);max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .15s;}
+.daily-pick:hover{border-color:var(--leaf);color:var(--leaf-deep);transform:translateY(-1px);}
+.daily-empty{font-size:12.5px;color:#9aa590;}
+.reminder-bell{font-family:var(--cn);font-size:13px;cursor:pointer;border-radius:10px;padding:8px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);transition:all .15s;white-space:nowrap;flex:none;}
+.reminder-bell:hover{border-color:var(--wilt);color:var(--wilt);}
 .reminder-bell.on{background:var(--wilt);color:#fff;border-color:var(--wilt);}
 .reminder-bell.on:hover{color:#fff;}
 .reminder-hint{flex-basis:100%;margin:2px 0 0;font-size:12px;color:#9a7b3f;line-height:1.5;}
