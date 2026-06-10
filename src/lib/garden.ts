@@ -35,6 +35,32 @@ export function isWilting(p: Plant, now: number): boolean {
   return s === 'wilt' || s === 'crit'
 }
 
+/** 把待看的草按枯萎程度分组，给提醒用（#2） */
+export function wiltingPlants(plants: Plant[], now: number): { wilt: Plant[]; crit: Plant[] } {
+  const wilt: Plant[] = []
+  const crit: Plant[] = []
+  for (const p of plants) {
+    const s = statusOf(p, now)
+    if (s === 'crit') crit.push(p)
+    else if (s === 'wilt') wilt.push(p)
+  }
+  return { wilt, crit }
+}
+
+/** “现在”是哪一天（按演示偏移后的本地日期），用于每天最多提醒一次 */
+export function dateKey(now: number): string {
+  const d = new Date(now)
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+}
+
+/** 一句话概括有多少草在枯，提醒条和桌面通知共用 */
+export function wiltSummary(wilt: number, crit: number): string {
+  const parts: string[] = []
+  if (wilt > 0) parts.push(`${wilt} 株在枯萎`)
+  if (crit > 0) parts.push(`${crit} 株快枯死了`)
+  return parts.join('、')
+}
+
 /** 经验 → 等级。曲线越往后越慢 */
 export function level(xp: number): number {
   return Math.floor(Math.sqrt(xp / 12)) + 1

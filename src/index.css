@@ -52,6 +52,16 @@ h1 .pin{color:var(--bloom);}
 .btn:hover{background:#456e2e;}
 .btn:active{transform:translateY(2px);box-shadow:0 0 0 #3c5e27;}
 
+.reminder{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:linear-gradient(var(--card),#FBF3DE);border:1px solid #E7C98A;border-radius:14px;padding:12px 16px;margin-bottom:16px;box-shadow:var(--shadow);}
+.reminder-text{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);line-height:1.4;}
+.reminder-emoji{font-size:20px;flex:none;}
+.reminder-actions{display:flex;gap:8px;flex:none;}
+.reminder-see,.reminder-bell{font-family:var(--cn);font-size:13px;cursor:pointer;border-radius:10px;padding:8px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);transition:all .15s;white-space:nowrap;}
+.reminder-see:hover,.reminder-bell:hover{border-color:var(--wilt);color:var(--wilt);}
+.reminder-bell.on{background:var(--wilt);color:#fff;border-color:var(--wilt);}
+.reminder-bell.on:hover{color:#fff;}
+.reminder-hint{flex-basis:100%;margin:2px 0 0;font-size:12px;color:#9a7b3f;line-height:1.5;}
+
 .gardenhead{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 12px;}
 .gardenhead h2{font-size:16px;margin:0;font-weight:700;}
 .filters{display:flex;gap:6px;}

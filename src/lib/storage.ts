@@ -2,17 +2,29 @@ import type { GardenState } from '../types'
 
 const KEY = 'daikan-garden:state'
 
-export const EMPTY: GardenState = { plants: [], xp: 0, demoOffset: 0 }
+export const EMPTY: GardenState = {
+  plants: [],
+  xp: 0,
+  demoOffset: 0,
+  reminders: { enabled: false, lastNotifiedOn: null },
+}
 
 export function loadState(): GardenState {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return { ...EMPTY }
     const parsed = JSON.parse(raw) as Partial<GardenState>
+    const r = parsed.reminders
     return {
       plants: Array.isArray(parsed.plants) ? parsed.plants : [],
       xp: typeof parsed.xp === 'number' ? parsed.xp : 0,
       demoOffset: typeof parsed.demoOffset === 'number' ? parsed.demoOffset : 0,
+      reminders: r && typeof r === 'object'
+        ? {
+            enabled: !!r.enabled,
+            lastNotifiedOn: typeof r.lastNotifiedOn === 'string' ? r.lastNotifiedOn : null,
+          }
+        : { enabled: false, lastNotifiedOn: null },
     }
   } catch {
     return { ...EMPTY }

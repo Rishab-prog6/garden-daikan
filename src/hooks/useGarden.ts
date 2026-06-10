@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GardenState, Plant } from '../types'
 import { loadState, saveState } from '../lib/storage'
-import { daysWaiting, nowOf, CRIT_DAYS, DAY } from '../lib/garden'
+import { daysWaiting, nowOf, CRIT_DAYS, DAY, wiltingPlants, dateKey, wiltSummary } from '../lib/garden'
 import type { ParsedItem } from '../lib/parse'
+import { fireReminder, requestNotificationPermission, notificationPermission } from '../lib/reminders'
 
 function seed(): Plant[] {
   // 首次打开给几株不同枯萎程度的草，演示/录屏时画面不空
@@ -69,7 +70,35 @@ export function useGarden() {
     setState((s) => ({ ...s, demoOffset: s.demoOffset + days * DAY }))
   }, [])
 
-  const reset = useCallback(() => setState({ plants: [], xp: 0, demoOffset: 0 }), [])
+  const reset = useCallback(
+    () => setState({ plants: [], xp: 0, demoOffset: 0, reminders: { enabled: false, lastNotifiedOn: null } }),
+    [],
+  )
+
+  /** 开/关枯萎提醒。开启时顺手请求通知权限 */
+  const setRemindersEnabled = useCallback(async (on: boolean) => {
+    if (on) await requestNotificationPermission()
+    setState((s) => ({
+      ...s,
+      reminders: { enabled: on, lastNotifiedOn: s.reminders?.lastNotifiedOn ?? null },
+    }))
+  }, [])
+
+  // 每天首次打开（或演示快进跨天）时，如果有草在枯且今天还没提醒过，弹一条桌面通知
+  useEffect(() => {
+    const r = state.reminders
+    if (!r?.enabled) return
+    if (notificationPermission() !== 'granted') return
+    const now = nowOf(state)
+    const { wilt, crit } = wiltingPlants(state.plants, now)
+    if (wilt.length + crit.length === 0) return
+    const key = dateKey(now)
+    if (r.lastNotifiedOn === key) return
+    fireReminder('你的花园在喊渴 🥀', `${wiltSummary(wilt.length, crit.length)} —— 今天救几株?`)
+    setState((s) => ({ ...s, reminders: { ...s.reminders!, lastNotifiedOn: key } }))
+    // 只在花园内容 / 演示偏移 / 开关变化时重新评估，避免每次渲染都触发
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.plants, state.demoOffset, state.reminders?.enabled])
 
   /** 批量导入，返回 { planted, skipped } */
   const importMany = useCallback((items: ParsedItem[]): { planted: number; skipped: number } => {
@@ -101,5 +130,5 @@ export function useGarden() {
     return { planted, skipped }
   }, [])
 
-  return { state, addPlant, finish, remove, fastForward, reset, importMany }
+  return { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled }
 }

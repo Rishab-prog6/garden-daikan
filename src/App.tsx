@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
 import { useGarden } from './hooks/useGarden'
-import { nowOf, isWilting } from './lib/garden'
+import { nowOf, wiltingPlants } from './lib/garden'
 import { Header } from './components/Header'
 import { Stats } from './components/Stats'
 import { AddPlant } from './components/AddPlant'
+import { ReminderBanner } from './components/ReminderBanner'
 import { Garden, type Filter } from './components/Garden'
 import { Wishlist } from './components/Wishlist'
 import { Footer } from './components/Footer'
@@ -11,7 +12,7 @@ import { Toast } from './components/Toast'
 import { ImportModal } from './components/ImportModal'
 
 export default function App() {
-  const { state, addPlant, finish, remove, fastForward, reset, importMany } = useGarden()
+  const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled } = useGarden()
   const [filter, setFilter] = useState<Filter>('todo')
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
@@ -27,10 +28,13 @@ export default function App() {
   const now = nowOf(state)
   const counts = useMemo(() => {
     const todo = state.plants.filter((p) => !p.watchedAt)
+    const { wilt, crit } = wiltingPlants(state.plants, now)
     return {
       todo: todo.length,
       bloomed: state.plants.length - todo.length,
-      wilting: todo.filter((p) => isWilting(p, now)).length,
+      wilt: wilt.length,
+      crit: crit.length,
+      wilting: wilt.length + crit.length,
     }
   }, [state.plants, now])
 
@@ -38,6 +42,16 @@ export default function App() {
     <div className="wrap">
       <Header xp={state.xp} />
       <Stats todo={counts.todo} bloomed={counts.bloomed} wilting={counts.wilting} />
+      <ReminderBanner
+        wilt={counts.wilt}
+        crit={counts.crit}
+        remindersEnabled={state.reminders?.enabled ?? false}
+        onToggleReminders={(on) => {
+          setRemindersEnabled(on)
+          if (on) showToast('开启提醒了 🔔 —— 标签页开着时，枯萎的草会来敲你')
+        }}
+        onSeeWilting={() => setFilter('todo')}
+      />
       <AddPlant onAdd={addPlant} onOpenImport={() => setShowImport(true)} />
       {showImport && (
         <ImportModal
