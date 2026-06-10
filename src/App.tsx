@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useGarden } from './hooks/useGarden'
+import { parseBackup } from './lib/storage'
 import { nowOf, wiltingPlants, fmtDay, todayPicks, currentStreak, dateKey } from './lib/garden'
 import { CalendarView } from './components/CalendarView'
 import { Header } from './components/Header'
@@ -14,7 +15,7 @@ import { PlantDetailModal } from './components/PlantDetailModal'
 import { ShareModal } from './components/ShareModal'
 
 export default function App() {
-  const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor } = useGarden()
+  const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor, restore } = useGarden()
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [showShare, setShowShare] = useState(false)
@@ -34,6 +35,29 @@ export default function App() {
     showToast(ts ? `排好了 📅 ${fmtDay(ts)} 看这株` : '取消了这株的档期')
   }
 
+  const exportBackup = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    const d = new Date()
+    a.download = `待看花园备份-${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}.json`
+    a.click()
+    URL.revokeObjectURL(a.href)
+    showToast('备份已导出 📦 收好别丢')
+  }
+
+  const importBackup = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const s = parseBackup(String(reader.result))
+      if (!s) { showToast('这个文件读不懂 —— 确定是花园的备份吗？'); return }
+      if (!window.confirm(`要用备份覆盖当前花园吗？\n备份里有 ${s.plants.length} 株，当前有 ${state.plants.length} 株。`)) return
+      restore(s)
+      showToast(`花园回来了 🌿 ${s.plants.length} 株安好`)
+    }
+    reader.readAsText(file)
+  }
+
   const now = nowOf(state)
   const counts = useMemo(() => {
     const todo = state.plants.filter((p) => !p.watchedAt)
@@ -46,6 +70,13 @@ export default function App() {
       wilting: wilt.length + crit.length,
     }
   }, [state.plants, now])
+
+  // tab 标题红点：有草在枯就把数字挂出来，切走的标签页也在提醒你
+  useEffect(() => {
+    document.title = counts.wilting > 0
+      ? `(${counts.wilting}🥀) 待看花园 · build in bilibili`
+      : '待看花园 · build in bilibili'
+  }, [counts.wilting])
 
   return (
     <div className="wrap">
@@ -100,7 +131,12 @@ export default function App() {
         ) : null
       })()}
       <Wishlist />
-      <Footer onFastForward={() => { fastForward(3); showToast('时间快进了 3 天 —— 看看谁开始枯萎了 🥀') }} onReset={reset} />
+      <Footer
+        onFastForward={() => { fastForward(3); showToast('时间快进了 3 天 —— 看看谁开始枯萎了 🥀') }}
+        onReset={reset}
+        onExportBackup={exportBackup}
+        onImportBackup={importBackup}
+      />
       <Toast msg={toast} />
     </div>
   )

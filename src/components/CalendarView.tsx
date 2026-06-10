@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
 import type { Plant } from '../types'
 import { dateKey, critAt, startOfDay, statusOf, SPRITE } from '../lib/garden'
+import { buildIcs } from '../lib/ics'
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
 
@@ -106,6 +107,16 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
     onPlan(id, null)
   }
 
+  const exportIcs = () => {
+    const blob = new Blob([buildIcs(plants, now)], { type: 'text/calendar;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = '待看花园.ics'
+    a.click()
+    URL.revokeObjectURL(a.href)
+    onNotice('日历文件下好了 📆 导入系统日历，手机也会催你看视频')
+  }
+
   const cells: (number | null)[] = []
   for (let i = 0; i < lead; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
@@ -115,6 +126,7 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
       <div className="cal-head">
         <h2>{year} 年 {month + 1} 月</h2>
         <div className="cal-nav">
+          <button onClick={exportIcs} title="下载 .ics 导入系统日历：排期和枯死预告都会出现在你手机日历里">📆 订阅</button>
           <button onClick={() => setOffset((o) => o - 1)} title="上个月">‹</button>
           {offset !== 0 && <button onClick={() => setOffset(0)}>回到本月</button>}
           <button onClick={() => setOffset((o) => o + 1)} title="下个月">›</button>

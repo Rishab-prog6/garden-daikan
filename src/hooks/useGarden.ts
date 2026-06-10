@@ -164,5 +164,8 @@ export function useGarden() {
     return { planted, skipped }
   }, [])
 
-  return { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor }
+  /** 用备份整体恢复花园（备份已经过 parseBackup 清洗） */
+  const restore = useCallback((s: GardenState) => setState(s), [])
+
+  return { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor, restore }
 }
