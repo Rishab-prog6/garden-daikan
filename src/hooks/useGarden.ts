@@ -164,8 +164,30 @@ export function useGarden() {
     return { planted, skipped }
   }, [])
 
+  /** 点「去B站看」出门时打个戳（真实时间，不掺演示偏移） */
+  const markVisited = useCallback((id: number) => {
+    setState((s) => ({ ...s, plants: s.plants.map((p) => (p.id === id ? { ...p, visitedAt: Date.now() } : p)) }))
+  }, [])
+
+  /** 回来确认完毕（无论看没看完），清掉出门戳，别反复问 */
+  const clearVisited = useCallback((id: number) => {
+    setState((s) => ({ ...s, plants: s.plants.map((p) => (p.id === id ? { ...p, visitedAt: undefined } : p)) }))
+  }, [])
+
+  /** 手动标观看进度（0-100）。到 100 由调用方走 finish 开花 */
+  const setProgress = useCallback((id: number, pct: number) => {
+    const v = Math.max(0, Math.min(100, Math.round(pct)))
+    setState((s) => ({
+      ...s,
+      plants: s.plants.map((p) => (p.id === id && !p.watchedAt ? { ...p, progress: v } : p)),
+    }))
+  }, [])
+
   /** 用备份整体恢复花园（备份已经过 parseBackup 清洗） */
   const restore = useCallback((s: GardenState) => setState(s), [])
 
-  return { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor, restore }
+  return {
+    state, addPlant, finish, remove, fastForward, reset, importMany,
+    setRemindersEnabled, setPlannedFor, restore, markVisited, clearVisited, setProgress,
+  }
 }

@@ -12,6 +12,10 @@ export interface Plant {
   bvid?: string
   /** 打算哪天看（时间戳，天精度）；可选，没排期就没有 */
   plannedFor?: number
+  /** 最近一次点「去B站看」出门的真实时间戳；回来时用来问"看完了吗" */
+  visitedAt?: number
+  /** 看到哪儿了（0-100）；100 等价于看完 */
+  progress?: number
 }
 
 /** 连续浇水打卡（玩法参考 Duolingo streak）。可选，向后兼容 */

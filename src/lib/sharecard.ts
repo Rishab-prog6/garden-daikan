@@ -1,7 +1,7 @@
 // 花园报告分享卡（玩法参考 Spotify Wrapped）：Canvas 画一张竖版 PNG。
 // 纯客户端生成，零依赖；色值运行时读 CSS 变量，跟主题保持一致。
 import type { GardenState, Plant } from '../types'
-import { SPRITE, statusOf, daysWaiting, level, currentStreak, isWilting } from './garden'
+import { spriteOf, daysWaiting, level, currentStreak, isWilting } from './garden'
 
 export interface GardenReport {
   total: number
@@ -30,7 +30,7 @@ export function buildReport(state: GardenState, now: number): GardenReport {
     streak: currentStreak(state.streak, now),
     lv: level(state.xp),
     dateText: `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`,
-    sprites: plants.slice(0, 21).map((p) => SPRITE[statusOf(p, now)]),
+    sprites: plants.slice(0, 21).map((p) => spriteOf(p, now)),
   }
 }
 

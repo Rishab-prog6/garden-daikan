@@ -16,6 +16,10 @@ interface Props {
   onFinish: (id: number) => void
   onRemove: (id: number) => void
   onPlan: (id: number, ts: number | null) => void
+  /** 拖进度条；拖到 100 由 App 转成开花 */
+  onProgress: (id: number, pct: number) => void
+  /** 点「去B站看」出门时打戳，回来好问"看完了吗" */
+  onVisited: (id: number) => void
 }
 
 function toInputValue(t: number): string {
@@ -25,7 +29,7 @@ function toInputValue(t: number): string {
   return `${d.getFullYear()}-${mm}-${dd}`
 }
 
-export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPlan }: Props) {
+export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPlan, onProgress, onVisited }: Props) {
   const st = statusOf(plant, now)
   const [picking, setPicking] = useState(false)
   const d = daysWaiting(plant, now)
@@ -73,6 +77,23 @@ export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPl
             )}
           {plant.bvid && <div className="detail-row"><span>BV 号</span><b>{plant.bvid}</b></div>}
         </div>
+        {!plant.watchedAt && (
+          <div className="detail-progress">
+            <div className="detail-progress-head">
+              <span>看到哪儿了？拖到头直接开花</span>
+              <b>{plant.progress ?? 0}%</b>
+            </div>
+            <input
+              className="progress-range"
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={plant.progress ?? 0}
+              onChange={(e) => onProgress(plant.id, Number(e.target.value))}
+            />
+          </div>
+        )}
         {picking && (
           <input
             className="plan-input"
@@ -84,7 +105,13 @@ export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPl
         )}
         <div className="detail-actions">
           {plant.link && (
-            <a className="btn btn-ghost" href={plant.link} target="_blank" rel="noreferrer">去 B 站看 ↗</a>
+            <a
+              className="btn btn-ghost"
+              href={plant.link}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => onVisited(plant.id)}
+            >去 B 站看 ↗</a>
           )}
           {!plant.watchedAt && (
             <button className="btn btn-ghost" onClick={() => setPicking((v) => !v)}>

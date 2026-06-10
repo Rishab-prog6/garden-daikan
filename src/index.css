@@ -83,6 +83,15 @@ h1 .pin{color:var(--bloom);}
 .detail-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
 .detail-actions .btn{padding:0 16px;height:40px;display:inline-flex;align-items:center;text-decoration:none;font-size:14px;}
 .btn-ghost.danger:hover{border-color:#d98c64;color:#a84e22;background:#fbe9e0;}
+.detail-progress{display:flex;flex-direction:column;gap:9px;background:var(--paper);border-radius:12px;padding:13px 15px;}
+.detail-progress-head{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink-soft);}
+.detail-progress-head b{color:var(--leaf-deep);font-family:var(--latin);font-size:15px;}
+.progress-range{width:100%;accent-color:var(--leaf-deep);cursor:pointer;height:22px;}
+
+.welcome{position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:150;display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;background:var(--card);border:1.5px solid var(--leaf);border-radius:16px;padding:13px 18px;box-shadow:0 12px 40px rgba(44,51,39,.25);max-width:min(92vw,640px);}
+.welcome-text{font-size:13.5px;line-height:1.45;color:var(--ink);}
+.welcome-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.welcome-actions .btn{height:36px;padding:0 14px;font-size:13px;display:inline-flex;align-items:center;}
 
 .wish{margin-top:26px;background:linear-gradient(#fdeef3,#fbe3ec);border:1px solid #f4c4d6;border-radius:var(--round);padding:16px 18px;}
 .wish h3{margin:0;font-size:14px;color:var(--bloom-deep);display:flex;align-items:center;gap:7px;}

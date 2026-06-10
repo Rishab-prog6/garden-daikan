@@ -1,5 +1,5 @@
 import type { Plant } from '../types'
-import { SPRITE, statusOf } from '../lib/garden'
+import { spriteOf } from '../lib/garden'
 import { notificationPermission } from '../lib/reminders'
 
 interface Props {
@@ -48,7 +48,7 @@ export function DailyCard({
           ? <span className="daily-empty">花园全开花了 ✨ 种点新的进来吧</span>
           : picks.map((p) => (
               <button key={p.id} className="daily-pick" onClick={() => onOpen(p.id)} title={`${p.title} —— 点开详情`}>
-                {SPRITE[statusOf(p, now)]} {p.title}
+                {spriteOf(p, now)} {p.title}
               </button>
             ))}
       </div>

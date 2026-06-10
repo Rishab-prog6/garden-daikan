@@ -13,14 +13,20 @@ import { Toast } from './components/Toast'
 import { ImportModal } from './components/ImportModal'
 import { PlantDetailModal } from './components/PlantDetailModal'
 import { ShareModal } from './components/ShareModal'
+import { WelcomeBack } from './components/WelcomeBack'
 
 export default function App() {
-  const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor, restore } = useGarden()
+  const {
+    state, addPlant, finish, remove, fastForward, reset, importMany,
+    setRemindersEnabled, setPlannedFor, restore, markVisited, clearVisited, setProgress,
+  } = useGarden()
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [showShare, setShowShare] = useState(false)
   /** 详情弹层里看的是哪株（存 id，数据实时跟 state 走） */
   const [detailId, setDetailId] = useState<number | null>(null)
+  /** 从 B 站回来要确认的那株 */
+  const [welcomeId, setWelcomeId] = useState<number | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
 
   const showToast = (msg: string | null) => {
@@ -78,6 +84,37 @@ export default function App() {
       : '待看花园 · build in bilibili'
   }, [counts.wilting])
 
+  // 半自动同步：从 B 站切回来时，问问刚才出门看的那株看完了没。
+  // 出门不足 90 秒大概率没看完不问；超过 6 小时过期也不问。
+  useEffect(() => {
+    const check = () => {
+      if (document.visibilityState !== 'visible') return
+      const nowReal = Date.now()
+      const cand = state.plants
+        .filter((p) => !p.watchedAt && p.visitedAt
+          && nowReal - p.visitedAt >= 90_000
+          && nowReal - p.visitedAt <= 6 * 3600_000)
+        .sort((a, b) => (b.visitedAt ?? 0) - (a.visitedAt ?? 0))[0]
+      if (cand) setWelcomeId(cand.id)
+    }
+    window.addEventListener('focus', check)
+    document.addEventListener('visibilitychange', check)
+    check()
+    return () => {
+      window.removeEventListener('focus', check)
+      document.removeEventListener('visibilitychange', check)
+    }
+  }, [state.plants])
+
+  const handleProgress = (id: number, pct: number) => {
+    if (pct >= 100) {
+      showToast(finish(id))
+      setDetailId(null)
+    } else {
+      setProgress(id, pct)
+    }
+  }
+
   return (
     <div className="wrap">
       <Header xp={state.xp} onShare={() => setShowShare(true)} />
@@ -127,6 +164,19 @@ export default function App() {
             onFinish={(id) => showToast(finish(id))}
             onRemove={remove}
             onPlan={handlePlan}
+            onProgress={handleProgress}
+            onVisited={markVisited}
+          />
+        ) : null
+      })()}
+      {(() => {
+        const wp = state.plants.find((p) => p.id === welcomeId && !p.watchedAt)
+        return wp ? (
+          <WelcomeBack
+            plant={wp}
+            onFinish={() => { showToast(finish(wp.id)); clearVisited(wp.id); setWelcomeId(null) }}
+            onPartial={() => { clearVisited(wp.id); setWelcomeId(null); setDetailId(wp.id) }}
+            onNotYet={() => { clearVisited(wp.id); setWelcomeId(null) }}
           />
         ) : null
       })()}

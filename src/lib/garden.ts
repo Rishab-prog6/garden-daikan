@@ -93,6 +93,14 @@ export function todayPicks(plants: Plant[], now: number, n = 3): Plant[] {
     .slice(0, n)
 }
 
+/** 药丸/缩影上显示的形态：枯了优先 🥀，看了一部分长成 🌿 */
+export function spriteOf(p: Plant, now: number): string {
+  const st = statusOf(p, now)
+  if (st === 'bloom') return '🌸'
+  if (st === 'wilt' || st === 'crit') return '🥀'
+  return (p.progress ?? 0) > 0 ? '🌿' : '🌱'
+}
+
 /** 当前有效 streak：最近一次浇水不是今天也不是昨天，火就灭了 */
 export function currentStreak(s: { count: number; lastDoneOn: string | null } | undefined, now: number): number {
   if (!s?.lastDoneOn) return 0

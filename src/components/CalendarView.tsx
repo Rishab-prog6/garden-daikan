@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
 import type { Plant } from '../types'
-import { dateKey, critAt, startOfDay, statusOf, SPRITE } from '../lib/garden'
+import { dateKey, critAt, startOfDay, spriteOf } from '../lib/garden'
 import { buildIcs } from '../lib/ics'
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
@@ -151,7 +151,7 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
                 onClick={() => onOpen(p.id)}
                 title={`${p.title} —— 点开详情；拖进下面的日历排档期`}
               >
-                {SPRITE[statusOf(p, now)]} {p.title}
+                {spriteOf(p, now)} {p.title}
               </span>
             ))}
       </div>
