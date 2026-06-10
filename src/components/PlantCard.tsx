@@ -5,6 +5,16 @@ const DOTCOL: Record<string, string> = {
   fresh: 'var(--leaf)', wilt: 'var(--wilt)', crit: 'var(--dead)', bloom: 'var(--bloom)',
 }
 
+function Title({ plant }: { plant: Plant }) {
+  // 有链接就让标题可点，新标签页打开去看；没链接保持纯文本
+  if (!plant.link) return <div className="ptitle">{plant.title}</div>
+  return (
+    <div className="ptitle">
+      <a href={plant.link} target="_blank" rel="noreferrer" title="去 B 站看这个视频">{plant.title}</a>
+    </div>
+  )
+}
+
 export function PlantCard({
   plant, now, onFinish, onRemove,
 }: {
@@ -20,7 +30,7 @@ export function PlantCard({
       <div className="plant bloom">
         <span className="bloomtag">DONE</span>
         <span className="sprite">🌸</span>
-        <div className="ptitle">{plant.title}</div>
+        <Title plant={plant} />
         <div className="pmeta">
           <span className="dot" style={{ background: DOTCOL.bloom }} />已开花
         </div>
@@ -38,7 +48,7 @@ export function PlantCard({
       {st === 'crit' && <span className="badge crit">快枯了</span>}
       {st === 'wilt' && <span className="badge">在枯萎</span>}
       <span className="sprite">{SPRITE[st]}</span>
-      <div className="ptitle">{plant.title}</div>
+      <Title plant={plant} />
       <div className="pmeta">
         <span className="dot" style={{ background: DOTCOL[st] }} />{waitTxt}
       </div>
