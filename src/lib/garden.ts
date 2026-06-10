@@ -61,6 +61,29 @@ export function wiltSummary(wilt: number, crit: number): string {
   return parts.join('、')
 }
 
+/** 当天零点（本地时区），天精度比较用 */
+export function startOfDay(t: number): number {
+  const d = new Date(t)
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+}
+
+/** 这株草哪天枯死（到达 crit 的那天），给日历预告用 */
+export function critAt(p: Plant): number {
+  return p.addedAt + CRIT_DAYS * DAY
+}
+
+/** 排期爽约了几天；没排期/已看完/还没到期都返回 0 */
+export function daysOverdue(p: Plant, now: number): number {
+  if (!p.plannedFor || p.watchedAt) return 0
+  return Math.max(0, Math.round((startOfDay(now) - startOfDay(p.plannedFor)) / DAY))
+}
+
+/** 短日期文案：6/14 */
+export function fmtDay(t: number): string {
+  const d = new Date(t)
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
 /** 经验 → 等级。曲线越往后越慢 */
 export function level(xp: number): number {
   return Math.floor(Math.sqrt(xp / 12)) + 1

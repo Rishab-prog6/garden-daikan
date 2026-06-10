@@ -7,7 +7,7 @@ export type Filter = 'todo' | 'bloom' | 'all'
 const ORDER: Record<Status, number> = { crit: 0, wilt: 1, fresh: 2, bloom: 3 }
 
 export function Garden({
-  plants, now, filter, onFilter, onFinish, onRemove,
+  plants, now, filter, onFilter, onFinish, onRemove, onPlan,
 }: {
   plants: Plant[]
   now: number
@@ -15,6 +15,7 @@ export function Garden({
   onFilter: (f: Filter) => void
   onFinish: (id: number) => void
   onRemove: (id: number) => void
+  onPlan: (id: number, ts: number | null) => void
 }) {
   const todo = plants.filter((p) => !p.watchedAt)
   const bloomed = plants.filter((p) => p.watchedAt)
@@ -50,7 +51,7 @@ export function Garden({
       ) : (
         <div className="grid">
           {list.map((p) => (
-            <PlantCard key={p.id} plant={p} now={now} onFinish={onFinish} onRemove={onRemove} />
+            <PlantCard key={p.id} plant={p} now={now} onFinish={onFinish} onRemove={onRemove} onPlan={onPlan} />
           ))}
         </div>
       )}

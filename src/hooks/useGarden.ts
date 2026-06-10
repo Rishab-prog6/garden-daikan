@@ -75,6 +75,14 @@ export function useGarden() {
     [],
   )
 
+  /** 给一株草排/改/取消档期（ts 传 null 表示取消） */
+  const setPlannedFor = useCallback((id: number, ts: number | null) => {
+    setState((s) => ({
+      ...s,
+      plants: s.plants.map((p) => (p.id === id ? { ...p, plannedFor: ts ?? undefined } : p)),
+    }))
+  }, [])
+
   /** 开/关枯萎提醒。开启时顺手请求通知权限 */
   const setRemindersEnabled = useCallback(async (on: boolean) => {
     if (on) await requestNotificationPermission()
@@ -130,5 +138,5 @@ export function useGarden() {
     return { planted, skipped }
   }, [])
 
-  return { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled }
+  return { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor }
 }

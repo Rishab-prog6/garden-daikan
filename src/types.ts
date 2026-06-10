@@ -10,6 +10,8 @@ export interface Plant {
   watchedAt: number | null
   /** B 站 BV 号，可选；用于去重 */
   bvid?: string
+  /** 打算哪天看（时间戳，天精度）；可选，没排期就没有 */
+  plannedFor?: number
 }
 
 /** 枯萎提醒设置（#2）。可选，老数据没有也不影响 */

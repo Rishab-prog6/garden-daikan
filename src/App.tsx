@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useGarden } from './hooks/useGarden'
-import { nowOf, wiltingPlants } from './lib/garden'
+import { nowOf, wiltingPlants, fmtDay } from './lib/garden'
+import { CalendarView } from './components/CalendarView'
 import { Header } from './components/Header'
 import { Stats } from './components/Stats'
 import { AddPlant } from './components/AddPlant'
@@ -12,8 +13,9 @@ import { Toast } from './components/Toast'
 import { ImportModal } from './components/ImportModal'
 
 export default function App() {
-  const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled } = useGarden()
+  const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor } = useGarden()
   const [filter, setFilter] = useState<Filter>('todo')
+  const [view, setView] = useState<'garden' | 'calendar'>('garden')
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
   const toastTimer = useRef<number | undefined>(undefined)
@@ -65,14 +67,26 @@ export default function App() {
           }}
         />
       )}
-      <Garden
-        plants={state.plants}
-        now={now}
-        filter={filter}
-        onFilter={setFilter}
-        onFinish={(id) => showToast(finish(id))}
-        onRemove={remove}
-      />
+      <div className="viewtabs">
+        <button className="chip" aria-pressed={view === 'garden'} onClick={() => setView('garden')}>🌿 花园</button>
+        <button className="chip" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>📅 日历</button>
+      </div>
+      {view === 'garden' ? (
+        <Garden
+          plants={state.plants}
+          now={now}
+          filter={filter}
+          onFilter={setFilter}
+          onFinish={(id) => showToast(finish(id))}
+          onRemove={remove}
+          onPlan={(id, ts) => {
+            setPlannedFor(id, ts)
+            showToast(ts ? `排好了 📅 ${fmtDay(ts)} 看这株` : '取消了这株的档期')
+          }}
+        />
+      ) : (
+        <CalendarView plants={state.plants} now={now} />
+      )}
       <Wishlist />
       <Footer onFastForward={() => { fastForward(3); showToast('时间快进了 3 天 —— 看看谁开始枯萎了 🥀') }} onReset={reset} />
       <Toast msg={toast} />
