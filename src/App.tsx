@@ -14,6 +14,8 @@ import { ImportModal } from './components/ImportModal'
 import { PlantDetailModal } from './components/PlantDetailModal'
 import { ShareModal } from './components/ShareModal'
 import { WelcomeBack } from './components/WelcomeBack'
+import { SyncModal } from './components/SyncModal'
+import type { SyncMatch } from './lib/syncParse'
 
 export default function App() {
   const {
@@ -23,6 +25,7 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [showShare, setShowShare] = useState(false)
+  const [showSync, setShowSync] = useState(false)
   /** 详情弹层里看的是哪株（存 id，数据实时跟 state 走） */
   const [detailId, setDetailId] = useState<number | null>(null)
   /** 从 B 站回来要确认的那株 */
@@ -115,6 +118,21 @@ export default function App() {
     }
   }
 
+  /** 应用历史记录同步结果：到头的开花，没到头的更新进度条 */
+  const applySync = (matches: SyncMatch[]) => {
+    let bloomed = 0
+    let updated = 0
+    for (const m of matches) {
+      if (m.willBloom) { finish(m.plantId); bloomed++ }
+      else { setProgress(m.plantId, m.newPct); updated++ }
+    }
+    showToast(
+      bloomed > 0
+        ? `同步好了：${bloomed} 株开花 🌸${updated > 0 ? `，${updated} 株进度更新` : ''}`
+        : `同步好了：${updated} 株进度更新 🌿`,
+    )
+  }
+
   return (
     <div className="wrap">
       <Header xp={state.xp} onShare={() => setShowShare(true)} />
@@ -134,7 +152,15 @@ export default function App() {
         }}
         onOpen={setDetailId}
       />
-      <AddPlant onAdd={addPlant} onOpenImport={() => setShowImport(true)} />
+      <AddPlant onAdd={addPlant} onOpenImport={() => setShowImport(true)} onOpenSync={() => setShowSync(true)} />
+      {showSync && (
+        <SyncModal
+          plants={state.plants}
+          onApply={applySync}
+          onNotice={showToast}
+          onClose={() => setShowSync(false)}
+        />
+      )}
       {showImport && (
         <ImportModal
           onClose={() => setShowImport(false)}

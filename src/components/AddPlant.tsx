@@ -3,9 +3,10 @@ import { useState } from 'react'
 interface Props {
   onAdd: (title: string) => void
   onOpenImport: () => void
+  onOpenSync: () => void
 }
 
-export function AddPlant({ onAdd, onOpenImport }: Props) {
+export function AddPlant({ onAdd, onOpenImport, onOpenSync }: Props) {
   const [v, setV] = useState('')
   const submit = () => {
     onAdd(v)
@@ -21,6 +22,7 @@ export function AddPlant({ onAdd, onOpenImport }: Props) {
       />
       <button className="btn" onClick={submit}>种下</button>
       <button className="btn btn-import" onClick={onOpenImport}>批量导入</button>
+      <button className="btn btn-import" onClick={onOpenSync} title="把 B 站历史记录的观看进度同步进来">同步进度</button>
     </div>
   )
 }
