@@ -10,6 +10,8 @@ interface Props {
   now: number
   onPlan: (id: number, ts: number | null) => void
   onNotice: (msg: string) => void
+  /** 点条目/药丸 → 打开详情 */
+  onOpen: (id: number) => void
 }
 
 interface DayItems {
@@ -18,28 +20,27 @@ interface DayItems {
 }
 
 function ItemLabel({
-  plant, kind, onDragStart,
+  plant, kind, onDragStart, onOpen,
 }: {
   plant: Plant
   kind: 'planned' | 'dying'
   onDragStart?: (e: DragEvent) => void
+  onOpen: (id: number) => void
 }) {
   const icon = kind === 'planned' ? '🌱' : '🥀'
-  const text = `${icon} ${plant.title}`
   const hint = kind === 'planned'
-    ? `安排了看：${plant.title}（拖到别的天可以改期）`
-    : `这天就枯死了：${plant.title}`
+    ? `安排了看：${plant.title}（点开详情，拖动可改期）`
+    : `这天就枯死了：${plant.title}（点开详情）`
   // 只有排期条目可拖（枯死预告是命运，不是日程，拖不动）
   const drag = kind === 'planned' ? { draggable: true, onDragStart } : {}
-  if (!plant.link) return <span className={'cal-item ' + kind} title={hint} {...drag}>{text}</span>
   return (
-    <a className={'cal-item ' + kind} href={plant.link} target="_blank" rel="noreferrer" title={hint + '（点了去看）'} {...drag}>
-      {text}
-    </a>
+    <span className={'cal-item ' + kind} title={hint} onClick={() => onOpen(plant.id)} {...drag}>
+      {icon} {plant.title}
+    </span>
   )
 }
 
-export function CalendarView({ plants, now, onPlan, onNotice }: Props) {
+export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
   // 看的是哪个月（相对当前月的偏移）
   const [offset, setOffset] = useState(0)
   // 拖拽正悬停在哪（格子的 dateKey 或 'tray'），用来高亮落点
@@ -53,6 +54,7 @@ export function CalendarView({ plants, now, onPlan, onNotice }: Props) {
   const lead = (first.getDay() + 6) % 7 // 周一开头要空几格
 
   const unplanned = plants.filter((p) => !p.watchedAt && !p.plannedFor)
+  const bloomed = plants.filter((p) => p.watchedAt)
 
   // 排期和枯死预告按“哪一天”分组；看完的草两边都不掺和
   const byDay = useMemo(() => {
@@ -134,7 +136,8 @@ export function CalendarView({ plants, now, onPlan, onNotice }: Props) {
                 className="cal-pill"
                 draggable
                 onDragStart={(e) => dragStart(e, p.id)}
-                title={`${p.title} —— 拖进下面的日历，排个档期`}
+                onClick={() => onOpen(p.id)}
+                title={`${p.title} —— 点开详情；拖进下面的日历排档期`}
               >
                 {SPRITE[statusOf(p, now)]} {p.title}
               </span>
@@ -181,6 +184,7 @@ export function CalendarView({ plants, now, onPlan, onNotice }: Props) {
                   key={kind[0] + p.id}
                   plant={p}
                   kind={kind}
+                  onOpen={onOpen}
                   onDragStart={kind === 'planned' ? (e) => dragStart(e, p.id) : undefined}
                 />
               ))}
@@ -193,8 +197,19 @@ export function CalendarView({ plants, now, onPlan, onNotice }: Props) {
       <div className="cal-legend">
         <span className="cal-key"><i className="k plan" />安排了看</span>
         <span className="cal-key"><i className="k die" />这天就枯死</span>
-        <span className="cal-tip">把上面的草拖进格子排档期 · 拖回托盘取消 · 🌱 可拖着改期</span>
+        <span className="cal-tip">拖草进格子排档期 · 拖回托盘取消 · 点任意一株看详情</span>
       </div>
+
+      {bloomed.length > 0 && (
+        <div className="cal-bloomed">
+          <span className="cal-tray-label">🌸 已开花 {bloomed.length}</span>
+          {bloomed.map((p) => (
+            <span key={p.id} className="cal-pill bloom" onClick={() => onOpen(p.id)} title={`${p.title} —— 点开详情`}>
+              🌸 {p.title}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

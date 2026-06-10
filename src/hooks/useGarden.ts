@@ -43,23 +43,29 @@ export function useGarden() {
     }))
   }, [])
 
+  // setState 的 updater 不保证同步执行，所以 toast 文案要在 setState 之前
+  // 用当前 state 算好。stateRef 让 finish 不用把 state 放进依赖。
+  const stateRef = useRef(state)
+  stateRef.current = state
+
   /** 看完一株 → 开花 + 涨经验。返回提示文案给 toast 用 */
   const finish = useCallback((id: number): string | null => {
-    let msg: string | null = null
-    setState((s) => {
-      const now = nowOf(s)
-      const plants = s.plants.map((p) => {
-        if (p.id !== id || p.watchedAt) return p
-        const revived = daysWaiting(p, now) >= CRIT_DAYS
-        msg = revived ? '起死回生！这株快枯了被你救回来 +25 XP' : '开花了 🌸  +10 XP'
-        return { ...p, watchedAt: now }
-      })
-      const target = s.plants.find((p) => p.id === id)
-      const gain = target && daysWaiting(target, now) >= CRIT_DAYS ? 25 : 10
-      const grew = target && !target.watchedAt
-      return { ...s, plants, xp: s.xp + (grew ? gain : 0) }
+    const s = stateRef.current
+    const now = nowOf(s)
+    const target = s.plants.find((p) => p.id === id)
+    if (!target || target.watchedAt) return null
+    const revived = daysWaiting(target, now) >= CRIT_DAYS
+    const gain = revived ? 25 : 10
+    setState((prev) => {
+      const t = prev.plants.find((p) => p.id === id)
+      if (!t || t.watchedAt) return prev // 已经开过花就不重复涨经验
+      return {
+        ...prev,
+        plants: prev.plants.map((p) => (p.id === id ? { ...p, watchedAt: now } : p)),
+        xp: prev.xp + gain,
+      }
     })
-    return msg
+    return revived ? '起死回生！这株快枯了被你救回来 +25 XP' : '开花了 🌸  +10 XP'
   }, [])
 
   const remove = useCallback((id: number) => {

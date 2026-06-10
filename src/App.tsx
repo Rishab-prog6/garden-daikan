@@ -6,18 +6,18 @@ import { Header } from './components/Header'
 import { Stats } from './components/Stats'
 import { AddPlant } from './components/AddPlant'
 import { ReminderBanner } from './components/ReminderBanner'
-import { Garden, type Filter } from './components/Garden'
 import { Wishlist } from './components/Wishlist'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
 import { ImportModal } from './components/ImportModal'
+import { PlantDetailModal } from './components/PlantDetailModal'
 
 export default function App() {
   const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor } = useGarden()
-  const [filter, setFilter] = useState<Filter>('todo')
-  const [view, setView] = useState<'garden' | 'calendar'>('garden')
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
+  /** 详情弹层里看的是哪株（存 id，数据实时跟 state 走） */
+  const [detailId, setDetailId] = useState<number | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
 
   const showToast = (msg: string | null) => {
@@ -57,7 +57,12 @@ export default function App() {
           setRemindersEnabled(on)
           if (on) showToast('开启提醒了 🔔 —— 标签页开着时，枯萎的草会来敲你')
         }}
-        onSeeWilting={() => setFilter('todo')}
+        onSeeWilting={() => {
+          // 直接打开最危险那株的详情
+          const { wilt, crit } = wiltingPlants(state.plants, now)
+          const target = crit[0] ?? wilt[0]
+          if (target) setDetailId(target.id)
+        }}
       />
       <AddPlant onAdd={addPlant} onOpenImport={() => setShowImport(true)} />
       {showImport && (
@@ -72,26 +77,26 @@ export default function App() {
           }}
         />
       )}
-      <div className="gardenbar">
-        <h2>我的花园</h2>
-        <div className="viewtabs">
-          <button className="chip" aria-pressed={view === 'garden'} onClick={() => setView('garden')}>🌿 花园</button>
-          <button className="chip" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>📅 日历</button>
-        </div>
-      </div>
-      {view === 'garden' ? (
-        <Garden
-          plants={state.plants}
-          now={now}
-          filter={filter}
-          onFilter={setFilter}
-          onFinish={(id) => showToast(finish(id))}
-          onRemove={remove}
-          onPlan={handlePlan}
-        />
-      ) : (
-        <CalendarView plants={state.plants} now={now} onPlan={handlePlan} onNotice={showToast} />
-      )}
+      <CalendarView
+        plants={state.plants}
+        now={now}
+        onPlan={handlePlan}
+        onNotice={showToast}
+        onOpen={setDetailId}
+      />
+      {(() => {
+        const detail = state.plants.find((p) => p.id === detailId)
+        return detail ? (
+          <PlantDetailModal
+            plant={detail}
+            now={now}
+            onClose={() => setDetailId(null)}
+            onFinish={(id) => showToast(finish(id))}
+            onRemove={remove}
+            onPlan={handlePlan}
+          />
+        ) : null
+      })()}
       <Wishlist />
       <Footer onFastForward={() => { fastForward(3); showToast('时间快进了 3 天 —— 看看谁开始枯萎了 🥀') }} onReset={reset} />
       <Toast msg={toast} />
