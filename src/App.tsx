@@ -11,11 +11,13 @@ import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
 import { ImportModal } from './components/ImportModal'
 import { PlantDetailModal } from './components/PlantDetailModal'
+import { ShareModal } from './components/ShareModal'
 
 export default function App() {
   const { state, addPlant, finish, remove, fastForward, reset, importMany, setRemindersEnabled, setPlannedFor } = useGarden()
   const [toast, setToast] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
+  const [showShare, setShowShare] = useState(false)
   /** 详情弹层里看的是哪株（存 id，数据实时跟 state 走） */
   const [detailId, setDetailId] = useState<number | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
@@ -47,7 +49,8 @@ export default function App() {
 
   return (
     <div className="wrap">
-      <Header xp={state.xp} />
+      <Header xp={state.xp} onShare={() => setShowShare(true)} />
+      {showShare && <ShareModal state={state} now={now} onClose={() => setShowShare(false)} />}
       <Stats todo={counts.todo} bloomed={counts.bloomed} wilting={counts.wilting} />
       <DailyCard
         picks={todayPicks(state.plants, now)}

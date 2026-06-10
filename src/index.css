@@ -31,6 +31,11 @@ h1{font-size:30px;line-height:1;margin:2px 0 0;font-weight:800;letter-spacing:-.
 h1 .pin{color:var(--bloom);}
 .tag{font-size:12.5px;color:var(--ink-soft);margin-top:7px;}
 
+.topright{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none;}
+.share-btn{font-family:var(--cn);font-size:12.5px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);border-radius:99px;padding:7px 14px;transition:all .15s;box-shadow:var(--shadow);}
+.share-btn:hover{border-color:var(--bloom);color:var(--bloom-deep);transform:translateY(-1px);}
+.modal.share{max-width:430px;}
+.share-canvas{width:100%;border-radius:12px;border:1px solid var(--line);display:block;}
 .lv{text-align:right;flex:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 14px;box-shadow:var(--shadow);}
 .lv .lab{font-family:var(--latin);font-size:11px;letter-spacing:.12em;color:var(--ink-soft);}
 .lv .num{font-family:var(--latin);font-weight:700;font-size:26px;line-height:1;color:var(--leaf-deep);}
