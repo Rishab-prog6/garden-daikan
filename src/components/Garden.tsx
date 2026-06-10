@@ -31,7 +31,6 @@ export function Garden({
   return (
     <>
       <div className="gardenhead">
-        <h2>我的花园</h2>
         <div className="filters">
           <button className="chip" aria-pressed={filter === 'todo'} onClick={() => onFilter('todo')}>待看 {todo.length}</button>
           <button className="chip" aria-pressed={filter === 'bloom'} onClick={() => onFilter('bloom')}>开花 {bloomed.length}</button>

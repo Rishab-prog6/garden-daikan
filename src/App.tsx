@@ -27,6 +27,11 @@ export default function App() {
     toastTimer.current = window.setTimeout(() => setToast(null), 2200)
   }
 
+  const handlePlan = (id: number, ts: number | null) => {
+    setPlannedFor(id, ts)
+    showToast(ts ? `排好了 📅 ${fmtDay(ts)} 看这株` : '取消了这株的档期')
+  }
+
   const now = nowOf(state)
   const counts = useMemo(() => {
     const todo = state.plants.filter((p) => !p.watchedAt)
@@ -67,9 +72,12 @@ export default function App() {
           }}
         />
       )}
-      <div className="viewtabs">
-        <button className="chip" aria-pressed={view === 'garden'} onClick={() => setView('garden')}>🌿 花园</button>
-        <button className="chip" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>📅 日历</button>
+      <div className="gardenbar">
+        <h2>我的花园</h2>
+        <div className="viewtabs">
+          <button className="chip" aria-pressed={view === 'garden'} onClick={() => setView('garden')}>🌿 花园</button>
+          <button className="chip" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>📅 日历</button>
+        </div>
       </div>
       {view === 'garden' ? (
         <Garden
@@ -79,13 +87,10 @@ export default function App() {
           onFilter={setFilter}
           onFinish={(id) => showToast(finish(id))}
           onRemove={remove}
-          onPlan={(id, ts) => {
-            setPlannedFor(id, ts)
-            showToast(ts ? `排好了 📅 ${fmtDay(ts)} 看这株` : '取消了这株的档期')
-          }}
+          onPlan={handlePlan}
         />
       ) : (
-        <CalendarView plants={state.plants} now={now} />
+        <CalendarView plants={state.plants} now={now} onPlan={handlePlan} onNotice={showToast} />
       )}
       <Wishlist />
       <Footer onFastForward={() => { fastForward(3); showToast('时间快进了 3 天 —— 看看谁开始枯萎了 🥀') }} onReset={reset} />
