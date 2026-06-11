@@ -5,4 +5,11 @@ dist-ssr
 .DS_Store
 .vscode/*
 !.vscode/extensions.json
-README.md
+
+# TypeScript / Vite build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# 自动录屏产物
+demo
