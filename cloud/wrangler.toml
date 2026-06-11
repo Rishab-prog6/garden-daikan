@@ -1,0 +1,9 @@
+name = "daikan-garden-sync"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+
+# 部署前先建 KV 命名空间并把 id 填进来：
+#   npx wrangler kv namespace create GARDEN
+[[kv_namespaces]]
+binding = "GARDEN"
+id = "REPLACE_WITH_KV_ID"

@@ -16,6 +16,18 @@ import { ShareModal } from './components/ShareModal'
 import { WelcomeBack } from './components/WelcomeBack'
 import { SyncModal } from './components/SyncModal'
 import type { SyncMatch } from './lib/syncParse'
+import { CloudModal } from './components/CloudModal'
+import type { SyncStatus } from './components/CloudModal'
+import { OnboardingModal } from './components/OnboardingModal'
+import { AchievementPanel } from './components/AchievementPanel'
+import { buildAchievements } from './lib/achievements'
+import { sampleGarden } from './lib/sample'
+import {
+  cloudReady, genKey, normalizeKey, pushGarden, pullGarden,
+  loadCloudKey, saveCloudKey, loadLastSavedAt, saveLastSavedAt,
+} from './lib/cloud'
+
+const ONBOARDING_KEY = 'daikan-garden:onboarded'
 
 export default function App() {
   const {
@@ -26,6 +38,14 @@ export default function App() {
   const [showImport, setShowImport] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showSync, setShowSync] = useState(false)
+  const [showCloud, setShowCloud] = useState(false)
+  const [cloudKey, setCloudKey] = useState<string | null>(() => loadCloudKey())
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
+  const [lastSyncAt, setLastSyncAt] = useState<number | null>(null)
+  const [initialCloudChecked, setInitialCloudChecked] = useState(() => !loadCloudKey() || !cloudReady())
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try { return localStorage.getItem(ONBOARDING_KEY) !== '1' } catch { return false }
+  })
   /** 详情弹层里看的是哪株（存 id，数据实时跟 state 走） */
   const [detailId, setDetailId] = useState<number | null>(null)
   /** 从 B 站回来要确认的那株 */
@@ -41,9 +61,110 @@ export default function App() {
     toastTimer.current = window.setTimeout(() => setToast(null), 2200)
   }
 
+  const closeOnboarding = () => {
+    try { localStorage.setItem(ONBOARDING_KEY, '1') } catch { /* ignored */ }
+    setShowOnboarding(false)
+  }
+
+  const loadSampleGarden = () => {
+    restore(sampleGarden(nowOf(state)))
+    closeOnboarding()
+    showToast('示例花园已载入 —— 可以直接录屏演示了')
+  }
+
   const handlePlan = (id: number, ts: number | null) => {
     setPlannedFor(id, ts)
     showToast(ts ? `排好了 📅 ${fmtDay(ts)} 看这株` : '取消了这株的档期')
+  }
+
+  /** 推一次云（加密后上传），共用的小帮手 */
+  const pushToCloud = async (key: string) => {
+    setSyncStatus('syncing')
+    try {
+      const savedAt = await pushGarden(key, stateRefForCloud.current)
+      saveLastSavedAt(savedAt)
+      setLastSyncAt(savedAt)
+      setSyncStatus('ok')
+    } catch {
+      setSyncStatus('error')
+    }
+  }
+  // push 时要拿最新 state，但又不想把 state 放进各回调的依赖里
+  const stateRefForCloud = useRef(state)
+  stateRefForCloud.current = state
+
+  // 自动上云：花园有改动且开了同步，1.5s 防抖推一次
+  const cloudTimer = useRef<number | undefined>(undefined)
+  useEffect(() => {
+    if (!cloudKey || !cloudReady() || !initialCloudChecked) return
+    window.clearTimeout(cloudTimer.current)
+    cloudTimer.current = window.setTimeout(() => pushToCloud(cloudKey), 1500)
+    return () => window.clearTimeout(cloudTimer.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, cloudKey, initialCloudChecked])
+
+  // 启动时拉云端：比本机新就用云端的（多设备场景：后写的赢）
+  useEffect(() => {
+    if (!cloudKey || !cloudReady()) {
+      setInitialCloudChecked(true)
+      return
+    }
+    pullGarden(cloudKey)
+      .then((payload) => {
+        if (payload && payload.savedAt > loadLastSavedAt()) {
+          restore(payload.state)
+          saveLastSavedAt(payload.savedAt)
+          setLastSyncAt(payload.savedAt)
+          setSyncStatus('ok')
+          showToast(`云端拉到了更新 —— ${payload.state.plants.length} 株已同步 ☁`)
+        }
+      })
+      .catch(() => setSyncStatus('error'))
+      .finally(() => setInitialCloudChecked(true))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const enableCloud = () => {
+    const key = genKey()
+    saveCloudKey(key)
+    setCloudKey(key)
+    setInitialCloudChecked(true)
+    pushToCloud(key)
+    showToast('钥匙生成了 —— 抄好它，这是花园唯一的门')
+  }
+
+  const restoreWithKey = async (raw: string) => {
+    const key = normalizeKey(raw)
+    if (!key) { showToast('这把钥匙的形状不对 —— 检查一下？'); return }
+    setSyncStatus('syncing')
+    try {
+      const payload = await pullGarden(key)
+      if (!payload) { setSyncStatus('idle'); showToast('这把钥匙下面还没有花园'); return }
+      if (state.plants.length > 0
+        && !window.confirm(`用钥匙里的花园（${payload.state.plants.length} 株）覆盖当前（${state.plants.length} 株）？`)) {
+        setSyncStatus('idle')
+        return
+      }
+      restore(payload.state)
+      saveCloudKey(key)
+      setCloudKey(key)
+      setInitialCloudChecked(true)
+      saveLastSavedAt(payload.savedAt)
+      setLastSyncAt(payload.savedAt)
+      setSyncStatus('ok')
+      showToast(`花园回来了 🌿 ${payload.state.plants.length} 株安好`)
+    } catch {
+      setSyncStatus('error')
+      showToast('云端没接通 —— 网络问题，稍后再试')
+    }
+  }
+
+  const disableCloud = () => {
+    saveCloudKey(null)
+    setCloudKey(null)
+    setInitialCloudChecked(true)
+    setSyncStatus('idle')
+    showToast('本机退出同步了 —— 云端还留着，凭钥匙随时回来')
   }
 
   const exportBackup = () => {
@@ -81,6 +202,7 @@ export default function App() {
       wilting: wilt.length + crit.length,
     }
   }, [state.plants, now])
+  const achievements = useMemo(() => buildAchievements(state, now), [state, now])
 
   // tab 标题红点：有草在枯就把数字挂出来，切走的标签页也在提醒你
   useEffect(() => {
@@ -138,8 +260,10 @@ export default function App() {
   return (
     <div className="wrap">
       <Header xp={state.xp} onShare={() => setShowShare(true)} />
+      {showOnboarding && <OnboardingModal onUseSample={loadSampleGarden} onClose={closeOnboarding} />}
       {showShare && <ShareModal state={state} now={now} onClose={() => setShowShare(false)} />}
       <Stats todo={counts.todo} bloomed={counts.bloomed} wilting={counts.wilting} />
+      <AchievementPanel achievements={achievements} />
       <DailyCard
         picks={todayPicks(state.plants, now)}
         todoCount={counts.todo}
@@ -215,7 +339,21 @@ export default function App() {
         onExportBackup={exportBackup}
         onImportBackup={importBackup}
         demoMode={demoMode}
+        cloudOn={cloudKey !== null}
+        onOpenCloud={() => setShowCloud(true)}
       />
+      {showCloud && (
+        <CloudModal
+          cloudKey={cloudKey}
+          status={syncStatus}
+          lastSyncAt={lastSyncAt}
+          onEnable={enableCloud}
+          onRestore={restoreWithKey}
+          onSyncNow={() => cloudKey && pushToCloud(cloudKey)}
+          onDisable={disableCloud}
+          onClose={() => setShowCloud(false)}
+        />
+      )}
       <Toast msg={toast} />
     </div>
   )

@@ -7,9 +7,11 @@ interface Props {
   onImportBackup: (file: File) => void
   /** URL 带 ?demo=1 才显示快进/重置（录屏调试入口，公开版隐藏） */
   demoMode: boolean
+  cloudOn: boolean
+  onOpenCloud: () => void
 }
 
-export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup, demoMode }: Props) {
+export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup, demoMode, cloudOn, onOpenCloud }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   return (
     <div className="foot">
@@ -18,6 +20,9 @@ export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup,
         <span>数据：</span>
         <button onClick={onExportBackup}>导出备份</button>
         <button onClick={() => fileRef.current?.click()}>导入备份</button>
+        <button onClick={onOpenCloud} className={cloudOn ? 'cloud-on' : ''}>
+          {cloudOn ? '● 云同步' : '云同步'}
+        </button>
         <input
           ref={fileRef}
           type="file"

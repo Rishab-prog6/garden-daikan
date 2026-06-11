@@ -1,5 +1,3 @@
-// 花园报告分享卡（玩法参考 Spotify Wrapped）：Canvas 画一张竖版 PNG。
-// 纯客户端生成，零依赖；色值运行时读 CSS 变量，跟主题保持一致。
 import type { GardenState, Plant } from '../types'
 import { spriteOf, daysWaiting, level, currentStreak, isWilting } from './garden'
 
@@ -12,7 +10,6 @@ export interface GardenReport {
   streak: number
   lv: number
   dateText: string
-  /** 花园缩影：每株草一个 emoji，最多 21 个 */
   sprites: string[]
 }
 
@@ -52,11 +49,12 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 function truncate(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
   if (ctx.measureText(text).width <= maxWidth) return text
   let t = text
-  while (t.length > 1 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1)
-  return t + '…'
+  while (t.length > 1 && ctx.measureText(`${t}…`).width > maxWidth) t = t.slice(0, -1)
+  return `${t}…`
 }
 
 const CN = '"PingFang SC","Microsoft YaHei",sans-serif'
+const MONO = '"JetBrains Mono",ui-monospace,monospace'
 
 export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   const W = 750
@@ -77,19 +75,18 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   const wilt = cssVar('--wilt', '#F0B43D')
   const line = cssVar('--line', 'rgba(220,255,235,.08)')
 
-  // 背景
   const bg = ctx.createLinearGradient(0, 0, 0, H)
   bg.addColorStop(0, paper)
   bg.addColorStop(1, paper2)
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, W, H)
+
   const sky = ctx.createRadialGradient(W / 2, -160, 60, W / 2, -160, 560)
   sky.addColorStop(0, cssVar('--sky', 'rgba(61,240,140,.07)'))
   sky.addColorStop(1, 'rgba(61,240,140,0)')
   ctx.fillStyle = sky
   ctx.fillRect(0, 0, W, 420)
 
-  // 标题区
   ctx.fillStyle = leafDeep
   ctx.font = `700 22px ${CN}`
   ctx.fillText('BUILD IN BILIBILI', 56, 78)
@@ -102,7 +99,6 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   ctx.fillText(r.dateText, W - 56, 140)
   ctx.textAlign = 'left'
 
-  // 四宫格统计
   const tiles: { num: number; label: string; color: string }[] = [
     { num: r.total, label: '一共种下', color: ink },
     { num: r.bloomed, label: '看完开花', color: bloom },
@@ -119,20 +115,19 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
     ctx.lineWidth = 2
     ctx.stroke()
     ctx.fillStyle = t.color
-    ctx.font = '700 46px "JetBrains Mono",ui-monospace,monospace'
+    ctx.font = `700 46px ${MONO}`
     ctx.fillText(String(t.num), x + 20, 245)
     ctx.fillStyle = inkSoft
     ctx.font = `400 21px ${CN}`
     ctx.fillText(t.label, x + 20, 285)
   })
 
-  // 开花率进度条
   const rate = r.total > 0 ? r.bloomed / r.total : 0
   ctx.fillStyle = inkSoft
   ctx.font = `400 24px ${CN}`
   ctx.fillText('开花率', 56, 380)
   ctx.fillStyle = ink
-  ctx.font = '700 30px "JetBrains Mono",ui-monospace,monospace'
+  ctx.font = `700 30px ${MONO}`
   ctx.textAlign = 'right'
   ctx.fillText(`${Math.round(rate * 100)}%`, W - 56, 382)
   ctx.textAlign = 'left'
@@ -148,7 +143,6 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
     ctx.fill()
   }
 
-  // 拖延之王
   ctx.fillStyle = card
   roundRect(ctx, 56, 450, W - 112, 150, 18)
   ctx.fill()
@@ -156,21 +150,20 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   ctx.stroke()
   ctx.font = `700 24px ${CN}`
   ctx.fillStyle = wilt
-  ctx.fillText('🥀 拖延之王', 84, 498)
+  ctx.fillText('拖延之王', 84, 498)
   if (r.oldest) {
     ctx.fillStyle = ink
     ctx.font = `700 28px ${CN}`
     ctx.fillText(truncate(ctx, r.oldest.title, W - 112 - 56), 84, 540)
     ctx.fillStyle = inkSoft
     ctx.font = `400 23px ${CN}`
-    ctx.fillText(`已经在收藏夹里躺了 ${r.oldest.days} 天`, 84, 576)
+    ctx.fillText(`已经在收藏夹里蹲了 ${r.oldest.days} 天`, 84, 576)
   } else {
     ctx.fillStyle = inkSoft
     ctx.font = `400 25px ${CN}`
-    ctx.fillText('暂无 —— 全都看完了，这花园成精了', 84, 545)
+    ctx.fillText('暂无。全都看完了,这花园成精了。', 84, 545)
   }
 
-  // streak + LV
   const pillW = (W - 112 - 18) / 2
   ctx.fillStyle = card
   roundRect(ctx, 56, 630, pillW, 96, 18)
@@ -181,10 +174,9 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   ctx.stroke()
   ctx.fillStyle = ink
   ctx.font = `700 30px ${CN}`
-  ctx.fillText(`${r.streak > 0 ? '🔥' : '🪵'} 连续浇水 ${r.streak} 天`, 86, 690)
-  ctx.fillText(`🌿 园丁等级 LV ${r.lv}`, 86 + pillW + 18, 690)
+  ctx.fillText(`连续浇水 ${r.streak} 天`, 86, 690)
+  ctx.fillText(`园丁等级 LV ${r.lv}`, 86 + pillW + 18, 690)
 
-  // 花园缩影（emoji 草地）
   ctx.fillStyle = card
   roundRect(ctx, 56, 756, W - 112, 150, 18)
   ctx.fill()
@@ -192,7 +184,7 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   if (r.sprites.length === 0) {
     ctx.fillStyle = inkSoft
     ctx.font = `400 24px ${CN}`
-    ctx.fillText('花园还空着 —— 等我种点东西', 84, 840)
+    ctx.fillText('花园还空着,等我种点东西。', 84, 840)
   } else {
     ctx.font = '34px system-ui'
     r.sprites.forEach((s, i) => {
@@ -202,10 +194,9 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
     })
   }
 
-  // 底部
   ctx.fillStyle = inkSoft
   ctx.font = `400 22px ${CN}`
-  ctx.fillText('🌱 待看花园 · 把收藏夹种成一片花园', 56, 956)
+  ctx.fillText('待看花园 · 把收藏夹种成一片花园', 56, 956)
   ctx.textAlign = 'right'
   ctx.fillText('build in bilibili · AI 创造公开赛', W - 56, 956)
   ctx.textAlign = 'left'
