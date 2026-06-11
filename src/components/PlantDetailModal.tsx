@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import type { Plant, Status } from '../types'
-import { SPRITE, statusOf, daysWaiting, daysOverdue, fmtDay } from '../lib/garden'
+import { statusOf, daysWaiting, daysOverdue, fmtDay } from '../lib/garden'
 
 const STATUS_TEXT: Record<Status, string> = {
-  fresh: '🌱 新鲜',
-  wilt: '🥀 在枯萎',
-  crit: '🥀 快枯了',
-  bloom: '🌸 已开花',
+  fresh: '新鲜',
+  wilt: '在枯萎',
+  crit: '快枯了',
+  bloom: '已开花',
 }
 
 interface Props {
@@ -55,7 +55,7 @@ export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPl
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal detail">
-        <span className="detail-sprite">{SPRITE[st]}</span>
+        <span className={'sdot lg ' + st} />
         <h2 className="modal-title">{plant.title}</h2>
         <div className="detail-rows">
           <div className="detail-row">
@@ -64,13 +64,13 @@ export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPl
           </div>
           <div className="detail-row"><span>种下</span><b>{fmtDay(plant.addedAt)}</b></div>
           {plant.watchedAt
-            ? <div className="detail-row"><span>开花</span><b>🌸 {fmtDay(plant.watchedAt)}</b></div>
+            ? <div className="detail-row"><span>开花</span><b>{fmtDay(plant.watchedAt)}</b></div>
             : (
               <div className="detail-row">
                 <span>档期</span>
                 <b className={late > 0 ? 'late-text' : ''}>
                   {plant.plannedFor
-                    ? `📅 ${fmtDay(plant.plannedFor)}${late > 0 ? `（爽约 ${late} 天）` : ''}`
+                    ? `${fmtDay(plant.plannedFor)}${late > 0 ? `（爽约 ${late} 天）` : ''}`
                     : '还没排 —— 拖进日历或点下面排期'}
                 </b>
               </div>
@@ -115,7 +115,7 @@ export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPl
           )}
           {!plant.watchedAt && (
             <button className="btn btn-ghost" onClick={() => setPicking((v) => !v)}>
-              📅 {plant.plannedFor ? '改期' : '排期'}
+              {plant.plannedFor ? '改期' : '排期'}
             </button>
           )}
           {!plant.watchedAt && plant.plannedFor && (
@@ -123,7 +123,7 @@ export function PlantDetailModal({ plant, now, onClose, onFinish, onRemove, onPl
           )}
           <button className="btn btn-ghost danger" onClick={() => { onRemove(plant.id); onClose() }}>移出花园</button>
           {!plant.watchedAt && (
-            <button className="btn" onClick={() => { onFinish(plant.id); onClose() }}>看完了 🌸</button>
+            <button className="btn" onClick={() => { onFinish(plant.id); onClose() }}>看完了 ✓</button>
           )}
         </div>
       </div>

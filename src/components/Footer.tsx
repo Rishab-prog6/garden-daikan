@@ -14,8 +14,8 @@ export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup 
       <span className="ver">v0.1 · 数据已存在本机浏览器</span>
       <div className="demo">
         <span>数据：</span>
-        <button onClick={onExportBackup}>📦 导出备份</button>
-        <button onClick={() => fileRef.current?.click()}>📥 导入备份</button>
+        <button onClick={onExportBackup}>导出备份</button>
+        <button onClick={() => fileRef.current?.click()}>导入备份</button>
         <input
           ref={fileRef}
           type="file"

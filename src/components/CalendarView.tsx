@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
 import type { Plant } from '../types'
-import { dateKey, critAt, startOfDay, spriteOf } from '../lib/garden'
+import { dateKey, critAt, startOfDay, dotClassOf } from '../lib/garden'
 import { buildIcs } from '../lib/ics'
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
@@ -28,7 +28,6 @@ function ItemLabel({
   onDragStart?: (e: DragEvent) => void
   onOpen: (id: number) => void
 }) {
-  const icon = kind === 'planned' ? '🌱' : '🥀'
   const hint = kind === 'planned'
     ? `安排了看：${plant.title}（点开详情，拖动可改期）`
     : `这天就枯死了：${plant.title}（点开详情）`
@@ -36,7 +35,7 @@ function ItemLabel({
   const drag = kind === 'planned' ? { draggable: true, onDragStart } : {}
   return (
     <span className={'cal-item ' + kind} title={hint} onClick={() => onOpen(plant.id)} {...drag}>
-      {icon} {plant.title}
+      <i className={'sdot ' + (kind === 'planned' ? 'plan' : 'crit')} /> {plant.title}
     </span>
   )
 }
@@ -126,7 +125,7 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
       <div className="cal-head">
         <h2>{year} 年 {month + 1} 月</h2>
         <div className="cal-nav">
-          <button onClick={exportIcs} title="下载 .ics 导入系统日历：排期和枯死预告都会出现在你手机日历里">📆 订阅</button>
+          <button onClick={exportIcs} title="下载 .ics 导入系统日历：排期和枯死预告都会出现在你手机日历里">ICS ↓</button>
           <button onClick={() => setOffset((o) => o - 1)} title="上个月">‹</button>
           {offset !== 0 && <button onClick={() => setOffset(0)}>回到本月</button>}
           <button onClick={() => setOffset((o) => o + 1)} title="下个月">›</button>
@@ -139,7 +138,7 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
         onDragLeave={() => setOverKey(null)}
         onDrop={dropOnTray}
       >
-        <span className="cal-tray-label">🪴 待排期</span>
+        <span className="cal-tray-label">待排期</span>
         {unplanned.length === 0
           ? <span className="cal-tray-empty">都排好了 ✨（把日历里的 🌱 拖回这里可以取消排期）</span>
           : unplanned.map((p) => (
@@ -151,7 +150,7 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
                 onClick={() => onOpen(p.id)}
                 title={`${p.title} —— 点开详情；拖进下面的日历排档期`}
               >
-                {spriteOf(p, now)} {p.title}
+                <i className={'sdot ' + dotClassOf(p, now)} /> {p.title}
               </span>
             ))}
       </div>
@@ -214,10 +213,10 @@ export function CalendarView({ plants, now, onPlan, onNotice, onOpen }: Props) {
 
       {bloomed.length > 0 && (
         <div className="cal-bloomed">
-          <span className="cal-tray-label">🌸 已开花 {bloomed.length}</span>
+          <span className="cal-tray-label">已开花 {bloomed.length}</span>
           {bloomed.map((p) => (
             <span key={p.id} className="cal-pill bloom" onClick={() => onOpen(p.id)} title={`${p.title} —— 点开详情`}>
-              🌸 {p.title}
+              <i className="sdot bloom" /> {p.title}
             </span>
           ))}
         </div>

@@ -93,7 +93,14 @@ export function todayPicks(plants: Plant[], now: number, n = 3): Plant[] {
     .slice(0, n)
 }
 
-/** 药丸/缩影上显示的形态：枯了优先 🥀，看了一部分长成 🌿 */
+/** 信号点形态（替代 emoji 精灵）：返回 .sdot 的修饰类名 */
+export function dotClassOf(p: Plant, now: number): Status | 'grow' {
+  const st = statusOf(p, now)
+  if (st === 'fresh' && (p.progress ?? 0) > 0) return 'grow'
+  return st
+}
+
+/** 药丸/缩影上显示的形态：枯了优先 🥀，看了一部分长成 🌿（分享卡缩影还在用） */
 export function spriteOf(p: Plant, now: number): string {
   const st = statusOf(p, now)
   if (st === 'bloom') return '🌸'

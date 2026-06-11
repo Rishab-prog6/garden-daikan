@@ -1,5 +1,5 @@
 import type { Plant } from '../types'
-import { spriteOf } from '../lib/garden'
+import { dotClassOf } from '../lib/garden'
 import { notificationPermission } from '../lib/reminders'
 
 interface Props {
@@ -35,7 +35,7 @@ export function DailyCard({
   return (
     <div className="daily">
       <div className="daily-streak" title="每天看完至少一个视频，火苗就不灭（断一天就重新烧）">
-        <span className="flame">{streak > 0 ? '🔥' : '🪵'}</span>
+        <span className="flame">{streak > 0 ? '◆' : '◇'}</span>
         <b>{streak}</b>
         <span className="daily-streak-label">{streakLabel}</span>
       </div>
@@ -48,7 +48,7 @@ export function DailyCard({
           ? <span className="daily-empty">花园全开花了 ✨ 种点新的进来吧</span>
           : picks.map((p) => (
               <button key={p.id} className="daily-pick" onClick={() => onOpen(p.id)} title={`${p.title} —— 点开详情`}>
-                {spriteOf(p, now)} {p.title}
+                <i className={'sdot ' + dotClassOf(p, now)} /> {p.title}
               </button>
             ))}
       </div>
@@ -58,7 +58,7 @@ export function DailyCard({
           className={'reminder-bell' + (bellOn ? ' on' : '')}
           onClick={() => onToggleReminders(!remindersEnabled)}
         >
-          {bellOn ? '🔔 提醒已开' : '🔔 开启提醒'}
+          {bellOn ? '◉ 提醒已开' : '○ 开启提醒'}
         </button>
       )}
       {denied && (

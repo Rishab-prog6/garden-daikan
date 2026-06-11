@@ -66,16 +66,16 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const paper = cssVar('--paper', '#EEF1E6')
-  const paper2 = cssVar('--paper-2', '#E5EAD8')
-  const card = cssVar('--card', '#F7F9F0')
-  const ink = cssVar('--ink', '#2C3327')
-  const inkSoft = cssVar('--ink-soft', '#5C6651')
-  const leaf = cssVar('--leaf', '#6FA046')
-  const leafDeep = cssVar('--leaf-deep', '#4E7A33')
-  const bloom = cssVar('--bloom', '#FB7299')
-  const wilt = cssVar('--wilt', '#CC9A3E')
-  const line = cssVar('--line', '#CCD5BC')
+  const paper = cssVar('--paper', '#0A0C0B')
+  const paper2 = cssVar('--paper-2', '#0D100E')
+  const card = cssVar('--card', '#111512')
+  const ink = cssVar('--ink', '#E6EDE7')
+  const inkSoft = cssVar('--ink-soft', '#93A096')
+  const leaf = cssVar('--leaf', '#3DF08C')
+  const leafDeep = cssVar('--leaf-deep', '#5BF5A2')
+  const bloom = cssVar('--bloom', '#FF5C8A')
+  const wilt = cssVar('--wilt', '#F0B43D')
+  const line = cssVar('--line', 'rgba(220,255,235,.08)')
 
   // 背景
   const bg = ctx.createLinearGradient(0, 0, 0, H)
@@ -84,8 +84,8 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, W, H)
   const sky = ctx.createRadialGradient(W / 2, -160, 60, W / 2, -160, 560)
-  sky.addColorStop(0, cssVar('--sky', '#CFE0D2'))
-  sky.addColorStop(1, 'rgba(207,224,210,0)')
+  sky.addColorStop(0, cssVar('--sky', 'rgba(61,240,140,.07)'))
+  sky.addColorStop(1, 'rgba(61,240,140,0)')
   ctx.fillStyle = sky
   ctx.fillRect(0, 0, W, 420)
 
@@ -119,7 +119,7 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
     ctx.lineWidth = 2
     ctx.stroke()
     ctx.fillStyle = t.color
-    ctx.font = '700 46px Fredoka,system-ui,sans-serif'
+    ctx.font = '700 46px "JetBrains Mono",ui-monospace,monospace'
     ctx.fillText(String(t.num), x + 20, 245)
     ctx.fillStyle = inkSoft
     ctx.font = `400 21px ${CN}`
@@ -132,7 +132,7 @@ export function drawShareCard(canvas: HTMLCanvasElement, r: GardenReport) {
   ctx.font = `400 24px ${CN}`
   ctx.fillText('开花率', 56, 380)
   ctx.fillStyle = ink
-  ctx.font = '700 30px Fredoka,system-ui,sans-serif'
+  ctx.font = '700 30px "JetBrains Mono",ui-monospace,monospace'
   ctx.textAlign = 'right'
   ctx.fillText(`${Math.round(rate * 100)}%`, W - 56, 382)
   ctx.textAlign = 'left'

@@ -97,7 +97,7 @@ export function SyncModal({ plants, onApply, onNotice, onClose }: Props) {
               <div className="sync-list">
                 {preview.matches.map((m) => (
                   <div key={m.plantId} className="sync-row">
-                    <span className="sync-icon">{m.willBloom ? '🌸' : '🌿'}</span>
+                    <span className="sync-icon"><i className={'sdot ' + (m.willBloom ? 'bloom' : 'grow')} /></span>
                     <span className="sync-title">{m.title}</span>
                     <b className={'sync-pct' + (m.willBloom ? ' bloom' : '')}>
                       {m.willBloom ? '看完，开花' : `${m.oldPct}% → ${m.newPct}%`}

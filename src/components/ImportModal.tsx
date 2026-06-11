@@ -48,7 +48,7 @@ export function ImportModal({ onImport, onClose }: Props) {
         />
         <div className="modal-actions">
           <button className="btn btn-ghost" onClick={onClose}>取消</button>
-          <button className="btn" onClick={handleImport}>种下 🌱</button>
+          <button className="btn" onClick={handleImport}>种下</button>
         </div>
       </div>
     </div>

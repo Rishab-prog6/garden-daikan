@@ -7,7 +7,7 @@ export function Header({ xp, onShare }: { xp: number; onShare: () => void }) {
       <div className="brand">
         <span className="logo">build in bilibili</span>
         <h1>
-          待看花<span className="pin">园</span>
+          待看花<span className="pin">园</span><span className="cursor" />
         </h1>
         <div className="tag">收藏从未停止,学习从未开始 —— 那就让收藏夹长出点东西。</div>
       </div>
@@ -19,7 +19,7 @@ export function Header({ xp, onShare }: { xp: number; onShare: () => void }) {
             <i style={{ width: `${Math.round((cur / span) * 100)}%` }} />
           </div>
         </div>
-        <button className="share-btn" onClick={onShare}>📸 晒花园</button>
+        <button className="share-btn" onClick={onShare}>⌗ 晒花园</button>
       </div>
     </div>
   )
