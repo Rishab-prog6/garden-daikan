@@ -30,6 +30,8 @@ export default function App() {
   const [detailId, setDetailId] = useState<number | null>(null)
   /** 从 B 站回来要确认的那株 */
   const [welcomeId, setWelcomeId] = useState<number | null>(null)
+  /** 录屏调试入口：URL 带 ?demo=1 才露出快进/重置 */
+  const demoMode = useMemo(() => new URLSearchParams(window.location.search).has('demo'), [])
   const toastTimer = useRef<number | undefined>(undefined)
 
   const showToast = (msg: string | null) => {
@@ -212,6 +214,7 @@ export default function App() {
         onReset={reset}
         onExportBackup={exportBackup}
         onImportBackup={importBackup}
+        demoMode={demoMode}
       />
       <Toast msg={toast} />
     </div>

@@ -5,9 +5,11 @@ interface Props {
   onReset: () => void
   onExportBackup: () => void
   onImportBackup: (file: File) => void
+  /** URL 带 ?demo=1 才显示快进/重置（录屏调试入口，公开版隐藏） */
+  demoMode: boolean
 }
 
-export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup }: Props) {
+export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup, demoMode }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   return (
     <div className="foot">
@@ -27,9 +29,13 @@ export function Footer({ onFastForward, onReset, onExportBackup, onImportBackup 
             e.target.value = '' // 同一个文件可以再次选择
           }}
         />
-        <span>演示模式：</span>
-        <button onClick={onFastForward}>⏩ 快进 3 天</button>
-        <button onClick={onReset}>重置</button>
+        {demoMode && (
+          <>
+            <span>演示模式：</span>
+            <button onClick={onFastForward}>⏩ 快进 3 天</button>
+            <button onClick={onReset}>重置</button>
+          </>
+        )}
       </div>
     </div>
   )

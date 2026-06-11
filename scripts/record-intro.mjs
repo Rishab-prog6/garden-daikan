@@ -122,7 +122,7 @@ async function main() {
   }
 
   // ============ 剧本开始 ============
-  await page.goto(APP)
+  await page.goto(APP + '/?demo=1') // 带上演示模式,快进按钮才在
   await sleep(2600) // ① 开场:夜光花园全貌
 
   // ② 今日浇水清单:点开最危险那株的详情(红色呼吸灯)
